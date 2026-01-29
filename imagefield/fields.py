@@ -272,10 +272,12 @@ class ImageFieldFile(files.ImageFieldFile):
             if self.closed:
                 self.open("rb")
             original.write(self.read())
-            self.seek(0)
             original.seek(0)
+            # Close the storage file now that we've copied data to `original`
+            self.close()
             image = backend.open(original)
             backend.verify_supported(image)
+            # Don't close `original` - PIL uses lazy loading and may need it
             self.__dict__["_image"] = image
 
         return self.__dict__.get("_image")
